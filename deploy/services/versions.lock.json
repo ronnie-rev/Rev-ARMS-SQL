@@ -1,0 +1,42 @@
+{
+  "lockedAt": "2026-11-09",
+  "note": "Document services run LOCALLY on the same machine (or private network) as ClaimsIQ. Versions are locked by tag and digest. Do not change one without re-running `node scripts/services-lock.cjs` and testing Studio and Document OCR.",
+  "services": {
+    "gotenberg": {
+      "image": "gotenberg/gotenberg",
+      "tag": "8.38.1",
+      "digest": "sha256:aa552cc115db488e0f0bcb07446aac13071ad51505b642c84bb894500907b42b",
+      "license": "MIT",
+      "source": "https://github.com/gotenberg/gotenberg",
+      "purpose": "Word / Excel / PowerPoint (including legacy .doc .xls .ppt) to PDF with true layout",
+      "paths": ["/gotenberg/health", "/gotenberg/forms/libreoffice/convert"]
+    },
+    "stirling": {
+      "image": "stirlingtools/stirling-pdf",
+      "tag": "2.11.0",
+      "digest": "sha256:b75b5ae2fcb75948f468718ed4c0bd499a8cafc9daf7f90f4c1e0e5a6acf9df8",
+      "license": "MIT (core)",
+      "source": "https://github.com/Stirling-Tools/Stirling-PDF",
+      "purpose": "Server-side OCR and compression for large PDFs",
+      "paths": ["/stirling/api/v1/info/status", "/stirling/api/v1/misc/compress-pdf", "/stirling/api/v1/misc/ocr-pdf"],
+      "apiAssumption": "v1 REST endpoints as documented by the project; verify after any upgrade"
+    },
+    "languagetool": {
+      "image": "erikvl87/languagetool",
+      "tag": "6.8",
+      "digest": "sha256:ef8fa12cbd485166c9ceeb7139d76d56d07707a624da6bb1fc1fbb5411750527",
+      "license": "LGPL-2.1 (LanguageTool); image wrapper MIT",
+      "source": "https://github.com/Erikvl87/docker-languagetool",
+      "purpose": "Spelling and grammar checks in the Word editor",
+      "paths": ["/languagetool/v2/languages", "/languagetool/v2/check"]
+    },
+    "proxy": {
+      "image": "nginx",
+      "tag": "1.30.5-alpine",
+      "digest": "sha256:0985e772fb9f729e6fa0980da05fca5d9c468e870eed43071545afa9d2e27d94",
+      "license": "BSD-2-Clause",
+      "source": "https://github.com/nginx/nginx",
+      "purpose": "Allow-list proxy: the only published port, bound to 127.0.0.1:8088"
+    }
+  }
+}

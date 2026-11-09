@@ -1,0 +1,12 @@
+{
+ "at": "2026-11-05T10:56:20.189Z",
+ "checked": 345,
+ "bad": [
+  {
+   "role": "Admin",
+   "page": "/tools  (linked from /)",
+   "kind": "broken-link",
+   "msg": "/tools → blank page"
+  }
+ ]
+}

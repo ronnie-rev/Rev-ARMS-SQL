@@ -1,0 +1,30 @@
+# Caddy (automatic HTTPS). Replace YOUR-DOMAIN. Serves the built app from /var/www/claimsiq/dist.
+YOUR-DOMAIN {
+  root * /var/www/claimsiq/dist
+  encode gzip zstd
+  header {
+    Strict-Transport-Security "max-age=63072000; includeSubDomains"
+    X-Frame-Options "DENY"
+    X-Content-Type-Options "nosniff"
+    Referrer-Policy "strict-origin-when-cross-origin"
+    Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=()"
+    Content-Security-Policy "default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://clinicaltables.nlm.nih.gov; worker-src 'self' blob:; frame-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests"
+  }
+  @shell path /index.html /version.json
+  header @shell Cache-Control "no-cache, no-store, must-revalidate"
+  @assets path /assets/*
+  header @assets Cache-Control "public, max-age=31536000, immutable"
+  # Local document services (Gotenberg / Stirling-PDF / LanguageTool) — see deploy/services. Same origin, so the CSP stays 'self'.
+  handle_path /svc/* {
+    request_body {
+      max_size 30MB
+    }
+    reverse_proxy 127.0.0.1:8088 {
+      transport http {
+        response_header_timeout 180s
+      }
+    }
+  }
+  try_files {path} /index.html
+  file_server
+}

@@ -1,0 +1,21 @@
+# API site for Caddy. Append this to the app site from deploy/Caddyfile (same /etc/caddy/Caddyfile), replacing YOUR-DOMAIN, then `systemctl reload caddy`.
+# Only the three paths the app needs are forwarded; Studio, the database and every other Supabase endpoint are NOT reachable from the internet
+# (reach Studio through an SSH tunnel:  ssh -L 8000:127.0.0.1:8000 you@server  then open http://localhost:8000 ).
+api.YOUR-DOMAIN {
+  encode gzip
+  header {
+    Strict-Transport-Security "max-age=63072000; includeSubDomains"
+    X-Content-Type-Options "nosniff"
+    -Server
+  }
+  request_body {
+    max_size 12MB
+  }
+  @allowed path /rest/v1/* /auth/v1/* /realtime/v1/*
+  handle @allowed {
+    reverse_proxy 127.0.0.1:8000
+  }
+  handle {
+    respond "Not found" 404
+  }
+}

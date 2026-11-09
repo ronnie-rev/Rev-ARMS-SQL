@@ -1,0 +1,21 @@
+# Periodic vulnerability + license review (monthly, and on every dependency change).
+# Fails when a production dependency has a high/critical advisory or a copyleft/unknown license that is not explicitly justified in scripts/licenses.cjs.
+name: Dependency review
+on:
+  schedule: [{ cron: '0 13 1 * *' }]
+  workflow_dispatch: {}
+  pull_request:
+    paths: ['package.json', 'package-lock.json']
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - run: npm ci
+      - run: npm run deps:review
+      - name: Verify the OCR assets match the pinned packages
+        run: npm run build && test -f dist/ocr/worker.min.js && test -f dist/ocr/lang/eng.traineddata.gz && ls dist/ocr/core | grep -c wasm.js
+      - name: Regenerate the third-party license inventory
+        run: npm run licenses && git diff --stat -- docs/THIRD_PARTY_LICENSES.md public/third-party-licenses.txt

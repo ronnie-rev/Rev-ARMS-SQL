@@ -1,0 +1,9 @@
+node_modules
+dist
+.env
+.env.local
+.netlify
+*.xlsx
+
+# self-hosted OCR assets are copied from node_modules by scripts/sync-ocr-assets.cjs
+public/ocr/

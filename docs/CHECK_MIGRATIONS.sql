@@ -1,0 +1,31 @@
+-- Paste into Supabase → SQL editor → Run. One row per migration file; "applied" is false for any you still need to run (run those in order).
+with t as (select table_name n from information_schema.tables where table_schema='public'),
+c as (select table_name||'.'||column_name n from information_schema.columns where table_schema='public'),
+f as (select proname n from pg_proc p join pg_namespace s on s.oid=p.pronamespace where s.nspname='public'),
+i as (select indexname n from pg_indexes where schemaname='public'),
+pol as (select policyname n, coalesce(qual,'')||coalesce(with_check,'') q, tablename from pg_policies where schemaname='public')
+select * from (values
+ ('0001_init',                     exists(select 1 from t where n='claims') and exists(select 1 from f where n='handle_new_user')),
+ ('0002_portal_intel',             exists(select 1 from c where n='claim_notes.client_visible')),
+ ('0003_engine',                   exists(select 1 from c where n='claims.fingerprint')),
+ ('0004_control',                  exists(select 1 from t where n='notifications')),
+ ('0005_config_unique_fix',        exists(select 1 from i where n='config_options_unique_idx')),
+ ('0006_user_items',               exists(select 1 from t where n='user_items')),
+ ('0007_client_access',            exists(select 1 from f where n='my_clients')),
+ ('0008_claim_snapshots',          exists(select 1 from t where n='claim_snapshots')),
+ ('0009_qa',                       exists(select 1 from t where n='qa_reviews')),
+ ('0010_scale_indexes',            exists(select 1 from i where n='claims_open_payer_idx')),
+ ('0011_roles',                    exists(select 1 from f where n='is_qa_manager')),
+ ('0012_role_tiers',               exists(select 1 from f where n='is_setup_role')),
+ ('0013_claim_identity_resolution',exists(select 1 from c where n='claims.claim_uid')),
+ ('0014_central_rules',            exists(select 1 from c where n='claims.expected_amt') and exists(select 1 from t where n='payer_limits')),
+ ('0015_manager_payer_rules',      exists(select 1 from pol where n='manager_write_payer_rules')),
+ ('0016_claim_summary',            exists(select 1 from f where n='claim_summary')),
+ ('0017_manager_issue_buckets',    exists(select 1 from pol where n='manager_write_content' and q like '%issue_bucket%')),
+ ('0018_manager_intel_rules',      exists(select 1 from pol where n='manager_write_payer_rules' and q like '%intel_cfg%')),
+ ('0019_fax_feedback_multiuser',   exists(select 1 from t where n='fax_log') and exists(select 1 from c where n='claims.rev')),
+ ('0020_client_sops_email',        exists(select 1 from pol where n='manager_write_payer_rules' and q like '%client_sops%')),
+ ('0021_client_fin',               exists(select 1 from pol where n='manager_write_payer_rules' and q like '%client_fin%')),
+ ('0023_block_uninvited_signup',    exists(select 1 from pg_proc p join pg_namespace n on n.oid=p.pronamespace where n.nspname='public' and p.proname='handle_new_user' and p.prosrc like '%has not been invited%')),
+ ('0022_staff_client_scope',       exists(select 1 from c where n='profiles.client_scope') and exists(select 1 from f where n='can_see_client') and exists(select 1 from pol where n='scope_claims'))
+) as x(migration, applied) order by 1;

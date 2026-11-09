@@ -1,0 +1,1 @@
+{ "compilerOptions": { "target": "ES2022", "module": "ESNext", "moduleResolution": "bundler", "strict": true, "skipLibCheck": true, "noEmit": true, "types": ["node"], "lib": ["ES2022", "DOM"], "jsx": "react-jsx", "resolveJsonModule": true, "esModuleInterop": true }, "include": ["netlify/functions/*.mts"] }
